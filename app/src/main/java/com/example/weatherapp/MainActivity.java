@@ -11,10 +11,12 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -36,18 +38,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LocationListener {
     private RelativeLayout homeRL;
     private ProgressBar loading;
     private TextView citynameview,tempview,conditionview;
     private TextInputEditText cityedit;
-    private ImageView searchlogo,iconview,backview;
+    private ImageView searchlogo,iconview,backview,currentlocation;
     private RecyclerView weather;
     private ArrayList<WeatherRVModel> WeatherRVModelArrayList;
     private WeatherRVAdapter weatherRVAdapter;
@@ -60,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         homeRL = findViewById(R.id.Home);
         loading = findViewById(R.id.loading);
@@ -71,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         searchlogo = findViewById(R.id.Ivsearch);
         backview = findViewById(R.id.imageback);
         iconview = findViewById(R.id.imagetemp);
+        currentlocation = findViewById(R.id.currentlocation);
 
         WeatherRVModelArrayList = new ArrayList<>();
         weatherRVAdapter = new WeatherRVAdapter(this,WeatherRVModelArrayList);
@@ -81,24 +86,35 @@ public class MainActivity extends AppCompatActivity {
         {
             ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},PERMISSION_CODE);
         }
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        cityName  = getCityName(location.getLongitude(),location.getLongitude());
-        getWeatherInfo(cityName);
+
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
         searchlogo.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                String city = cityedit.getText().toString();
-                if(city.isEmpty())
+                String newcity = cityedit.getText().toString();
+
+                if(newcity.isEmpty())
                 {
                     Toast.makeText(MainActivity.this,"Please enter city name",Toast.LENGTH_SHORT).show();
                 }
                 else{
-                    citynameview.setText(cityName);
-                    getWeatherInfo(city);
+                    getWeatherInfo(newcity);
+                    citynameview.setText(newcity);
                 }
             }
         });
+        currentlocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getWeatherInfo(cityName);
+            }
+        });
+    }
 
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        cityName  = getCityName(location.getLongitude(),location.getLatitude());
+        getWeatherInfo(cityName);
 
     }
 
@@ -122,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         String cityname = "Not found";
         Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
         try{
-            List<Address> addresses = gcd.getFromLocation(latitude,longitude,10);
+            List<Address> addresses = gcd.getFromLocation(latitude,longitude,1);
             for(Address adr : addresses){
                 if(adr != null)
                 { String city = adr.getLocality();
@@ -142,8 +158,8 @@ public class MainActivity extends AppCompatActivity {
         return cityname;
     }
     private void getWeatherInfo(String cityname){
-        String url = "http://api.weatherapi.com/v1/forecast.json?key=c5714249f35940a0b02132556222202&q="+cityname+"&days=1&aqi=yes&alerts=yes";
-        citynameview.setText(cityName);
+        String url = "https://api.weatherapi.com/v1/forecast.json?key=c5714249f35940a0b02132556222202&q="+cityname+"&days=1&aqi=yes&alerts=yes";
+        citynameview.setText(cityname);
         RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -158,13 +174,12 @@ public class MainActivity extends AppCompatActivity {
                     int isDay = response.getJSONObject("current").getInt("is_day");
                     String condition = response.getJSONObject("current").getJSONObject("condition").getString("text");
                     String conditionicon = response.getJSONObject("current").getJSONObject("condition").getString("icon");
-                    Picasso.get().load("http:".concat(conditionicon)).into(iconview);
+                    Picasso.get().load("https:".concat(conditionicon)).into(iconview);
                     conditionview.setText(condition);
                     if (isDay == 1) {
-                        Picasso.get().load("https://www.google.com/imgres?imgurl=https%3A%2F%2Fwww.publicdomainpictures.net%2Fpictures%2F350000%2Fnahled%2Fimage-1593602641Ebc.jpg&imgrefurl=https%3A%2F%2Fwww.publicdomainpictures.net%2Fen%2Fview-image.php%3Fimage%3D349195%26picture%3Dmorning-clouds-and-sky&tbnid=0X42JsYYZudGpM&vet=12ahUKEwiM0LqAoJX2AhVihNgFHbbwBB4QMygZegUIARCLAg..i&docid=iI0Uguh95ReQZM&w=615&h=410&q=morning%20clouds&ved=2ahUKEwiM0LqAoJX2AhVihNgFHbbwBB4QMygZegUIARCLAg").into(backview);
-
+                        Picasso.get().load(R.drawable.morning).into(backview);
                     } else {
-                        Picasso.get().load("https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.flickr.com%2Fphotos%2Fpetrozilla%2F5601802469&psig=AOvVaw0yczZGKVQGLMqRiYIh5C4G&ust=1645686058841000&source=images&cd=vfe&ved=0CAsQjRxqFwoTCNDk67qglfYCFQAAAAAdAAAAABAD").into(backview);
+                        Picasso.get().load(R.drawable.night).into(backview);
                     }
                     JSONObject forecastObj = response.getJSONObject("forecast");
                     JSONObject forecastArray = forecastObj.getJSONArray("forecastday").getJSONObject(0);
@@ -175,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
                         String time = hourobj.getString("time");
                         String temp = hourobj.getString("temp_c");
                         String img = hourobj.getJSONObject("condition").getString("icon");
+                        //Toast.makeText(MainActivity.this,img,Toast.LENGTH_SHORT).show();
                         String wind = hourobj.getString("wind_kph");
                         WeatherRVModelArrayList.add(new WeatherRVModel(time, temp, img, wind));
                     }
@@ -192,5 +208,4 @@ public class MainActivity extends AppCompatActivity {
         });
         requestQueue.add(jsonObjectRequest);
     }
-
 }

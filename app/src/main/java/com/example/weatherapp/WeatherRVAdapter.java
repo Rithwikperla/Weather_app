@@ -19,7 +19,7 @@ import java.util.Date;
 
 public class WeatherRVAdapter extends RecyclerView.Adapter<WeatherRVAdapter.ViewHolder> {
     private Context context;
-    ArrayList<WeatherRVModel> WeatherRVModelArrayList;
+    private ArrayList<WeatherRVModel> WeatherRVModelArrayList;
 
     public WeatherRVAdapter(Context context, ArrayList<WeatherRVModel> weatherRVModelArrayList) {
         this.context = context;
@@ -49,9 +49,7 @@ public class WeatherRVAdapter extends RecyclerView.Adapter<WeatherRVAdapter.View
         }
         holder.temp.setText(model.getTemp()+"°C");
         holder.wind.setText(model.getWindspeed()+"Km/h");
-
-
-        Picasso.get().load("http".concat(model.getIcon())).into(holder.condition);
+        Picasso.get().load("https://".concat(model.getIcon())).into(holder.condition);
     }
 
     @Override
