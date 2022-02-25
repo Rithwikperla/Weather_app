@@ -96,39 +96,50 @@
 
 
         </LinearLayout>
+
         <TextView
+            android:id="@+id/tempview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_below="@+id/linearlyt"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="20dp"
+            android:gravity="center_horizontal"
             android:padding="5dp"
             android:text="23"
             android:textColor="@color/white"
-            android:textSize="70dp"
-            android:id="@+id/tempview"
-            android:layout_below="@+id/linearlyt"
-            android:gravity="center_horizontal"
-            ></TextView>
+            android:textSize="50dp"
+            android:textStyle="bold"></TextView>
+
         <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:id="@+id/imagetemp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_below="@id/tempview"
             android:layout_centerHorizontal="true"
-            android:id="@+id/imagetemp"
-            android:layout_margin="10dp"
-            android:src="@mipmap/ic_launcher"
-            ></ImageView>
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:src="@mipmap/ic_launcher"></ImageView>
+
         <TextView
+            android:id="@+id/tempcondition"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/tempcondition"
-            android:layout_margin="10dp"
-            android:textAlignment="center"
-            android:textColor="@color/white"
             android:layout_below="@id/imagetemp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
             android:gravity="center"
             android:text="condition"
+            android:textAlignment="center"
+            android:textColor="@color/white"
             android:textSize="40dp"
-            ></TextView>
+            android:textStyle="italic"></TextView>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
